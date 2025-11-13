@@ -1,1 +1,1 @@
-https://doc.gold.ac.uk/usr/205/
+home=https://doc.gold.ac.uk/usr/205/
