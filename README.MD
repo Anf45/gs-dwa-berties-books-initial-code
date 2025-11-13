@@ -1,10 +1,23 @@
 # Berties Books
+Features:
+    View all books (/books/list)
 
-Sample code for Dynamic Web Applications module.
+    Add a new book (/books/addbook)
 
-Uses node.js with Express and EJS.
+    Bargain books under £20 (/books/bargainbooks)
 
-To install and run:
+    Search books (exact + partial match)
 
-npm install
-node index.js
+    User registration page
+
+Run Locally
+    npm install
+    node index.js
+    Visit: http://localhost:8000
+
+Deploy on VM
+    cd ~/06_berties_33828420
+    git pull
+    forever start -a --uid "bertieApp" index.js
+    Link: home=http://www.doc.gold.ac.uk/usr/33828300/
+
