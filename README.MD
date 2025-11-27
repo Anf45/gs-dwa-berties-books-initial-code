@@ -40,3 +40,28 @@ In the `/users/loggedin` route, every login attempt inserts a row into this tabl
 
 There is also a `/users/audit` route which selects all rows from the `audit` table and renders them in `audit.ejs` as a table so I can see who logged in, whether it was successful, and when it happened.
 
+## Access control (Lab 8a)
+
+I used `express-session` to store a `userId` in the session after successful login.
+
+I then used a `redirectLogin` middleware to protect some routes:
+
+- Protected routes (login required):
+  - `/users/list`
+  - `/users/audit`
+  - `/books/list`
+  - `/books/addbook`
+  - `/books/bookadded`
+  - `/books/bargainbooks`
+
+If `req.session.userId` is not set, these routes redirect to `/users/login`.
+
+- Public routes (no login required):
+  - `/` (home)
+  - `/about`
+  - `/users/register`
+  - `/users/login`
+  - `/books/search`
+  - `/books/search-result`
+
+This means only logged in users can see user details or manage/view full book lists, but anyone can visit the site and search books.

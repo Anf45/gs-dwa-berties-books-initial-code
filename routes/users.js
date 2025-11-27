@@ -3,6 +3,16 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
+//8
+const redirectLogin = (req, res, next) => {
+    if (!req.session.userId ) {
+      res.redirect('./login') // redirect to the login page
+    } else { 
+        next (); // move to the next function
+    } 
+}
+//8
+
 // Show registration form
 router.get("/register", function (req, res, next) {
   res.render("register.ejs");
@@ -96,6 +106,10 @@ router.post("/loggedin", function (req, res, next) {
         "INSERT INTO audit (username, loginStatus) VALUES (?, ?)";
 
       if (match === true) {
+        ////8
+        // Save user session here, when login is successful
+        req.session.userId = req.body.username;
+///8
         // log successful login
         db.query(auditQuery, [username, "SUCCESS"], (err2) => {
           if (err2) return next(err2);
@@ -113,7 +127,8 @@ router.post("/loggedin", function (req, res, next) {
 });
 
 // List all registered users (no passwords shown)
-router.get("/list", function (req, res, next) {
+// 8: protected by redirectLogin
+router.get("/list", redirectLogin, function (req, res, next) {
   const sqlquery =
     "SELECT username, firstName, lastName, email FROM users";
 
@@ -125,9 +140,8 @@ router.get("/list", function (req, res, next) {
   });
 });
 
-// 
 // Show audit log of logins
-router.get("/audit", function (req, res, next) {
+router.get("/audit", redirectLogin, function (req, res, next) {
   const sqlquery =
     "SELECT username, loginStatus, loginTime FROM audit ORDER BY loginTime DESC";
 
