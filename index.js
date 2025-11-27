@@ -5,6 +5,7 @@ const path = require('path')
 //8
 const session = require('express-session');
 //8
+const expressSanitizer = require('express-sanitizer');   // 8b sanitiser
 
 // Import mysql2
 var mysql = require('mysql2')
@@ -29,6 +30,9 @@ app.set('view engine', 'ejs')
 
 // Set up the body parser 
 app.use(express.urlencoded({ extended: true }))
+
+app.use(expressSanitizer());
+
 
 // Set up public folder (for css and static js)
 app.use(express.static(path.join(__dirname, 'public')))

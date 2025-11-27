@@ -8,6 +8,15 @@
   <body>
     <h1>Register for <%= shopData.shopName %></h1>
 
+    <!-- Validation errors -->
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <ul>
+        <% errors.forEach(function(error) { %>
+          <li style="color:red;"><%= error.msg %></li>
+        <% }); %>
+      </ul>
+    <% } %>
+
     <form method="POST" action="/users/registered">
         
         <p>First name: 
@@ -28,6 +37,8 @@
 
         <p>Password: 
           <input id="password" type="password" name="password" required />
+          <br>
+          <small>Password must be at least 8 characters</small>
         </p>
 
         <input type="submit" value="Register" />

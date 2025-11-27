@@ -41,13 +41,18 @@ router.get('/bargainbooks', redirectLogin, function (req, res, next) {
 
 // Handle add book form submit (locked)
 router.post('/bookadded', redirectLogin, function (req, res, next) {
+
+    // ✅ 8b: sanitise user inputs
+    let cleanName  = req.sanitize(req.body.name);
+    let cleanPrice = req.sanitize(req.body.price);
+
     let sqlquery = "INSERT INTO books (name, price) VALUES (?, ?)";
-    let newrecord = [req.body.name, req.body.price];
+    let newrecord = [cleanName, cleanPrice];
 
     db.query(sqlquery, newrecord, (err, result) => {
         if (err) next(err);
         else res.send("This book is added to database, name: " 
-            + req.body.name + " price " + req.body.price);
+            + cleanName + " price " + cleanPrice);
     });
 });
 
@@ -58,13 +63,19 @@ router.get('/search', function(req, res, next) {
 
 // Search results (public)
 router.get('/search-result', function (req, res, next) {
-  let keyword = req.query.keyword;
+
+  // ✅ 8b: sanitise search keyword
+  let keyword = req.sanitize(req.query.keyword);
+
   let sqlquery = "SELECT * FROM books WHERE name LIKE ?";
   db.query(sqlquery, ['%' + keyword + '%'], (err, result) => {
     if (err) {
       next(err);
     } else {
-      res.render('search-results.ejs', { results: result, searchTerm: keyword });
+      res.render('search-results.ejs', { 
+        results: result, 
+        searchTerm: keyword   // now safe to display
+      });
     }
   });
 });

@@ -65,3 +65,31 @@ If `req.session.userId` is not set, these routes redirect to `/users/login`.
   - `/books/search-result`
 
 This means only logged in users can see user details or manage/view full book lists, but anyone can visit the site and search books.
+
+## Lab 8bc
+
+I used the `express-sanitizer` package to protect the site against Cross Site Scripting (XSS) attacks.
+
+In `index.js`:
+    app.use(expressSanitizer());
+
+I sanitised all user inputs that are displayed back to the browser:
+
+In `users.js`:
+    - First name
+    - Last name
+
+Example:
+    const cleanFirst = req.sanitize(req.body.first);
+    const cleanLast  = req.sanitize(req.body.last);
+
+In `books.js`:
+    - Book name from `/books/bookadded`
+    - Search keyword from `/books/search-result`
+
+This prevents users injecting malicious scripts such as:
+    <script>alert("hack")</script>
+
+I did NOT sanitise:
+    - Passwords (they are hashed and never displayed)
+    - Emails (only validated, sanitising could break valid formats)

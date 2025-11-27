@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const { check, validationResult } = require('express-validator');  // 8b
 
 //8
 const redirectLogin = (req, res, next) => {
@@ -25,49 +26,68 @@ router.get("/login", function (req, res, next) {
 
 // Handle registration form submit
 // Hash password and store user in DB
-router.post("/registered", function (req, res, next) {
-  const plainPassword = req.body.password;
-
-  bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
-    if (err) {
-      return next(err);
+router.post(
+  "/registered",
+  [
+    check("email").isEmail().withMessage("Please enter a valid email address."),
+    check("username").isLength({ min: 5, max: 20 })
+      .withMessage("Username must be between 5 and 20 characters."),
+    check("password").isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters long.")
+  ],
+  function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.render("register.ejs", { errors: errors.array() });
     }
 
-    // Store user details in the database
-    const sqlquery =
-      "INSERT INTO users (username, firstName, lastName, email, hashedPassword) VALUES (?,?,?,?,?)";
-    const newrecord = [
-      req.body.username,
-      req.body.first,
-      req.body.last,
-      req.body.email,
-      hashedPassword,
-    ];
+    // 8b: sanitise names to prevent XSS
+    const cleanFirst = req.sanitize(req.body.first);
+    const cleanLast  = req.sanitize(req.body.last);
 
-    db.query(sqlquery, newrecord, (err, result) => {
+    const plainPassword = req.body.password;
+
+    bcrypt.hash(plainPassword, saltRounds, function (err, hashedPassword) {
       if (err) {
         return next(err);
       }
 
-      let resultMsg =
-        "Hello " +
-        req.body.first +
-        " " +
-        req.body.last +
-        " you are now registered! We will send an email to you at " +
-        req.body.email;
+      // Store user details in the database
+      const sqlquery =
+        "INSERT INTO users (username, firstName, lastName, email, hashedPassword) VALUES (?,?,?,?,?)";
+      const newrecord = [
+        req.body.username,
+        cleanFirst,          // use sanitised first name
+        cleanLast,           // use sanitised last name
+        req.body.email,
+        hashedPassword,
+      ];
 
-      // DEBUG 
-      resultMsg +=
-        "<br>Your password is: " +
-        req.body.password +
-        " and your hashed password is: " +
-        hashedPassword;
+      db.query(sqlquery, newrecord, (err, result) => {
+        if (err) {
+          return next(err);
+        }
 
-      res.send(resultMsg);
+        let resultMsg =
+          "Hello " +
+          cleanFirst +        // use sanitised first name in output
+          " " +
+          cleanLast +         // use sanitised last name in output
+          " you are now registered! We will send an email to you at " +
+          req.body.email;
+
+        // DEBUG 
+        resultMsg +=
+          "<br>Your password is: " +
+          req.body.password +
+          " and your hashed password is: " +
+          hashedPassword;
+
+        res.send(resultMsg);
+      });
     });
-  });
-});
+  }
+);
 
 // Handle login form submit
 // Compare supplied password with stored hash
