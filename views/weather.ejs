@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Weather – <%= shopData.shopName %></title>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+  </head>
+
+  <body>
+    <h1>Check the weather</h1>
+
+    <form method="GET" action="/weather">
+      <p>
+        <label for="city">City name:</label>
+        <input
+          id="city"
+          type="text"
+          name="city"
+          value="<%= city || '' %>"
+          placeholder="e.g. London, Paris, Tokyo"
+          required
+        />
+        <button type="submit">Get weather</button>
+      </p>
+    </form>
+
+    <% if (weather) { %>
+      <h2>Result</h2>
+      <p><%- weather %></p>   
+    <% } %>
+
+    <% if (error) { %>
+      <p style="color:red;"><%= error %></p>
+    <% } %>
+
+    <p><a href="/">Back to home</a></p>
+  </body>
+</html>
